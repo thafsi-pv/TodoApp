@@ -26,7 +26,7 @@
   .todo {
     position: relative;
     background-color: #142431;
-    max-width: 500px;
+    max-width: 480px;
     width: 100%;
     margin: auto;
     border-radius: 4px;
@@ -46,6 +46,9 @@
     padding-right: 45px;
     width: 100%;
     border-radius: 4px;
+  }
+  input:focus{
+    outline: none;
   }
   .add-input {
     flex-grow: 1;
@@ -70,6 +73,7 @@
     font-weight: 700;
     padding: 0;
     margin: 15px;
+    text-align: center;
   }
   .item-title {
     font-size: large;

@@ -4,6 +4,7 @@ import { BsFillPencilFill, BsFillTrash3Fill, BsCircle } from "react-icons/bs";
 import { AiOutlineCheckCircle } from "react-icons/ai";
 import { IoIosClose } from "react-icons/io";
 import axios from "axios";
+import { TODO_API, TODO_DELETECOMPLETED_API, TODO_FILTERLIST_API, TODO_GETBYID_API } from "../../constants/constants";
 
 export const Todo = () => {
   const [todoList, setTodoList] = useState([]);
@@ -17,16 +18,12 @@ export const Todo = () => {
   const [itemLeft, setItemLeft] = useState();
 
   useEffect(() => {
-    //const dt = localStorage.getItem("TFR-TODO");
-    //dt && setTodoList(JSON.parse(localStorage.getItem("TFR-TODO")));
-
     getTodoList();
     inputRef.current.focus();
   }, []);
 
   const getTodoList = async () => {
-    const data = await axios("http://localhost:3005/gettodo");
-    console.log("🚀 ~ file: Todo.jsx:28 ~ getTodoList ~ data:", data);
+    const data = await axios(TODO_API);
     setTodoList(data?.data);
   };
 
@@ -36,7 +33,6 @@ export const Todo = () => {
   }, [todoList]);
 
   const handleAddTodo = () => {
-    //const data = localStorage.getItem("TFR-TODO");
     if (newTodo) {
       const newitem = {
         id: Math.random().toString(36).substr(2, 9),
@@ -53,7 +49,7 @@ export const Todo = () => {
   };
 
   const addnewTodo = async (newitem) => {
-    const data = await axios("http://localhost:3005/addtodo", {
+    const data = await axios(TODO_API, {
       method: "POST",
       data: {
         todo: newitem,
@@ -63,7 +59,7 @@ export const Todo = () => {
   };
 
   const todoIsCompleted = async (id) => {
-    const data = await axios("http://localhost:3005/iscompleted", {
+    const data = await axios(TODO_API, {
       method: "PATCH",
       data: {
         id: id,
@@ -73,71 +69,51 @@ export const Todo = () => {
   };
 
   const todoDelete = async (id) => {
-    //const newlist = todoList.filter((item) => item.id != id);
-
-    const data = await axios("http://localhost:3005/delete", {
+    const data = await axios(TODO_API, {
       method: "DELETE",
       data: { id },
     });
 
     setTodoList(data?.data);
-    //localStorage.setItem("TFR-TODO", JSON.stringify(newlist));
   };
 
   const handleTodoEdit = async (id) => {
-    console.log("🚀 ~ file: Todo.jsx:87 ~ handleTodoEdit ~ id:", id);
     setEditTodeId(id);
-    const data = await axios("http://localhost:3005/gettodobyid", {
+    const data = await axios(TODO_GETBYID_API, {
       method: "POST",
       data: { id },
     });
-    console.log("🚀 ~ file: Todo.jsx:91 ~ handleTodoEdit ~ data:", data);
 
     setEditTodo(data?.data[0].todo);
-
-    // const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
-    // const index = editTodoList.findIndex((obj) => obj.id == id);
-    // setEditTodo(editTodoList[index].todo);
     setTimeout(() => inputEditRef.current.focus(), 0);
   };
 
   const updateTodo = async () => {
     if (editTodo) {
-      const data = await axios("http://localhost:3005/edittodo", {
+      const data = await axios(TODO_API, {
         method: "PUT",
         data: {
           id: editTodoId,
           todo: editTodo,
         },
       });
-      console.log("🚀 ~ file: Todo.jsx:113 ~ updateTodo ~ data:", data);
       setTodoList(data?.data);
-
-      // const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
-      // const index = editTodoList.findIndex((obj) => obj.id == editTodoId);
-      // editTodoList[index].todo = editTodo;
-      // editTodoList[index].isCompleted = false;
-      // setTodoList(editTodoList);
-      // localStorage.setItem("TFR-TODO", JSON.stringify(editTodoList));
       setEditTodeId("");
     } else alert("An empty world is impossible!..");
   };
 
   const clearCompleted = async () => {
-    // const newList = todoList.filter((item) => item.isCompleted != true);
-
-    const data = await axios("http://localhost:3005/deleteiscompleted", {
+    const data = await axios(TODO_DELETECOMPLETED_API, {
       method: "DELETE",
     });
 
     setTodoList(data?.data);
     setFilterType('all')
-    // localStorage.setItem("TFR-TODO", JSON.stringify(newList));
   };
 
   const handleFilterlist = async (type) => {
     setFilterType(type);
-    const data = await axios("http://localhost:3005/filterlist", {
+    const data = await axios(TODO_FILTERLIST_API, {
       method: "POST",
       data: {
         type,

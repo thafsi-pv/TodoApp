@@ -9,16 +9,16 @@ app.use(express.json());
 const todoList = require("./TodoList.json");
 
 const userList = [{ name: "abc", mail: "abc@gmail.com" }];
-app.get("/gettodo", (req, res) => {
+app.get("/api/todo", (req, res) => {
   res.json(todoList);
 });
 
-app.post("/addtodo", (req, res) => {
+app.post("/api/todo", (req, res) => {
   todoList.unshift(req.body.todo);
   res.json(todoList);
 });
 
-app.patch("/iscompleted", (req, res) => {
+app.patch("/api/todo", (req, res) => {
   const { id } = req.body;
   const newlist = todoList.map((item) => {
     if (item.id == id) {
@@ -32,7 +32,7 @@ app.patch("/iscompleted", (req, res) => {
   res.json(newlist);
 });
 
-app.delete("/delete", (req, res) => {
+app.delete("/api/todo", (req, res) => {
   const { id } = req.body;
   console.log("🚀 ~ file: server.js:37 ~ app.delete ~ id:", id);
   const newlist = todoList.filter((item) => item.id != id);
@@ -41,20 +41,16 @@ app.delete("/delete", (req, res) => {
   res.json(newlist);
 });
 
-app.post("/gettodobyid", (req, res) => {
+app.post("/api/gettodobyid", (req, res) => {
   const { id } = req.body;
   console.log("🚀 ~ file: server.js:45 ~ app.get ~ id:", id);
   const todo = todoList.filter((item) => item.id == id);
-  console.log("🚀 ~ file: server.js:46 ~ app.get ~ todo:", todo);
   res.json(todo);
 });
 
-app.put("/edittodo", (req, res) => {
+app.put("/api/todo", (req, res) => {
   const { id, todo } = req.body;
-  console.log("🚀 ~ file: server.js:54 ~ app.put ~ todo:", todo);
-  console.log("🚀 ~ file: server.js:54 ~ app.put ~ id:", id);
   const index = todoList.findIndex((item) => item.id == id);
-
   const newlist = todoList.map((item) => {
     if (item.id == id) {
       return { ...item, todo: todo, isCompleted: false };
@@ -66,13 +62,13 @@ app.put("/edittodo", (req, res) => {
   res.json(newlist);
 });
 
-app.delete("/deleteiscompleted", (req, res) => {
+app.delete("/api/deleteiscompleted", (req, res) => {
   const newlist = todoList.filter((item) => item.isCompleted != true);
   fs.writeFileSync("./TodoList.json", JSON.stringify(newlist));
   res.json(newlist);
 });
 
-app.post("/filterlist", (req, res) => {
+app.post("/api/filterlist", (req, res) => {
   const { type } = req.body;
   if (type === "all") {
     res.json(todoList);
