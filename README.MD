@@ -1,4 +1,5 @@
 # Todo App
+<img width="1440" alt="Screenshot 2023-05-21 at 8 48 32 PM" src="https://github.com/thafsi-pv/TodoApp/assets/22377348/2055cb4f-aafc-43a6-9e89-ef60ab75c1c3">
 
 This is a Todo App which uses React for the front-end and Node.js with Express.js for the back-end API. It allows users to add, delete, edit and mark todos as completed. It also provides filter options for all, active and completed todos.
 
