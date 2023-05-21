@@ -10,6 +10,7 @@ export const Todo = () => {
   const [newTodo, setNewTodo] = useState("");
   const [editTodo, setEditTodo] = useState("");
   const [editTodoId, setEditTodeId] = useState("");
+  const [filterType, setFilterType] = useState("all");
   const inputRef = useRef(null);
   const inputEditRef = useRef(null);
   const todoListRef = useRef(null);
@@ -25,6 +26,7 @@ export const Todo = () => {
 
   const getTodoList = async () => {
     const data = await axios("http://localhost:3005/gettodo");
+    console.log("🚀 ~ file: Todo.jsx:28 ~ getTodoList ~ data:", data);
     setTodoList(data?.data);
   };
 
@@ -60,20 +62,7 @@ export const Todo = () => {
     setTodoList(data?.data);
   };
 
-  const todoIsCompleted = (id) => {
-    // const newlist = todoList.map((item) => {
-    //   if (item.id == id) {
-    //     return { ...item, isCompleted: !item.isCompleted };
-    //   } else {
-    //     return { ...item };
-    //   }
-    // });
-   markIsCompleted(id)
-    //setTodoList(newlist);
-    //localStorage.setItem("TFR-TODO", JSON.stringify(newlist));
-  };
-
-  const markIsCompleted = async (id) => {
+  const todoIsCompleted = async (id) => {
     const data = await axios("http://localhost:3005/iscompleted", {
       method: "PATCH",
       data: {
@@ -83,36 +72,78 @@ export const Todo = () => {
     setTodoList(data?.data);
   };
 
-  const todoDelete = (id) => {
-    const newlist = todoList.filter((item) => item.id != id);
-    setTodoList(newlist);
-    localStorage.setItem("TFR-TODO", JSON.stringify(newlist));
+  const todoDelete = async (id) => {
+    //const newlist = todoList.filter((item) => item.id != id);
+
+    const data = await axios("http://localhost:3005/delete", {
+      method: "DELETE",
+      data: { id },
+    });
+
+    setTodoList(data?.data);
+    //localStorage.setItem("TFR-TODO", JSON.stringify(newlist));
   };
 
-  const handleTodoEdit = (id) => {
+  const handleTodoEdit = async (id) => {
+    console.log("🚀 ~ file: Todo.jsx:87 ~ handleTodoEdit ~ id:", id);
     setEditTodeId(id);
-    const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
-    const index = editTodoList.findIndex((obj) => obj.id == id);
-    setEditTodo(editTodoList[index].todo);
+    const data = await axios("http://localhost:3005/gettodobyid", {
+      method: "POST",
+      data: { id },
+    });
+    console.log("🚀 ~ file: Todo.jsx:91 ~ handleTodoEdit ~ data:", data);
+
+    setEditTodo(data?.data[0].todo);
+
+    // const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
+    // const index = editTodoList.findIndex((obj) => obj.id == id);
+    // setEditTodo(editTodoList[index].todo);
     setTimeout(() => inputEditRef.current.focus(), 0);
   };
 
-  const updateTodo = () => {
+  const updateTodo = async () => {
     if (editTodo) {
-      const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
-      const index = editTodoList.findIndex((obj) => obj.id == editTodoId);
-      editTodoList[index].todo = editTodo;
-      editTodoList[index].isCompleted = false;
-      setTodoList(editTodoList);
-      localStorage.setItem("TFR-TODO", JSON.stringify(editTodoList));
+      const data = await axios("http://localhost:3005/edittodo", {
+        method: "PUT",
+        data: {
+          id: editTodoId,
+          todo: editTodo,
+        },
+      });
+      console.log("🚀 ~ file: Todo.jsx:113 ~ updateTodo ~ data:", data);
+      setTodoList(data?.data);
+
+      // const editTodoList = JSON.parse(localStorage.getItem("TFR-TODO"));
+      // const index = editTodoList.findIndex((obj) => obj.id == editTodoId);
+      // editTodoList[index].todo = editTodo;
+      // editTodoList[index].isCompleted = false;
+      // setTodoList(editTodoList);
+      // localStorage.setItem("TFR-TODO", JSON.stringify(editTodoList));
       setEditTodeId("");
     } else alert("An empty world is impossible!..");
   };
 
-  const clearCompleted = () => {
-    const newList = todoList.filter((item) => item.isCompleted != true);
-    setTodoList(newList);
-    localStorage.setItem("TFR-TODO", JSON.stringify(newList));
+  const clearCompleted = async () => {
+    // const newList = todoList.filter((item) => item.isCompleted != true);
+
+    const data = await axios("http://localhost:3005/deleteiscompleted", {
+      method: "DELETE",
+    });
+
+    setTodoList(data?.data);
+    setFilterType('all')
+    // localStorage.setItem("TFR-TODO", JSON.stringify(newList));
+  };
+
+  const handleFilterlist = async (type) => {
+    setFilterType(type);
+    const data = await axios("http://localhost:3005/filterlist", {
+      method: "POST",
+      data: {
+        type,
+      },
+    });
+    setTodoList(data?.data);
   };
 
   return (
@@ -223,9 +254,11 @@ export const Todo = () => {
               <p>{itemLeft} Item left</p>
             </div>
             <div className="btn-filter">
-              <p className="active">All</p>
-              <p>Active</p>
-              <p>Completed</p>
+              <p className={`${filterType==='all'?'active':''}`} onClick={() => handleFilterlist("all")}>
+                All
+              </p>
+              <p className={`${filterType==='active'?'active':''}`} onClick={() => handleFilterlist("active")}>Active</p>
+              <p className={`${filterType==='completed'?'active':''}`} onClick={() => handleFilterlist("completed")}>Completed</p>
             </div>
             <div className="">
               <p className="clear-completed" onClick={() => clearCompleted()}>

@@ -183,12 +183,18 @@
     border-top: 1px dashed rgba(211, 211, 211, 0.293);
     color: #e8e9ea5b;
     width: 100%;
+    font-size: smaller;
+    padding: 0 15px;
   }
   .btn-filter{
     display: flex;
     justify-content: space-between;
-    margin-left: 30px;
+    margin-left: 10px;
     cursor: pointer;
+  }
+  .btn-filter p{
+    padding: 0 5px 0;
+   text-align: center;
   }
   .active{
     border: 1px solid lightblue;
