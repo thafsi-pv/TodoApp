@@ -99,7 +99,6 @@ export const Todo = () => {
             isCompleted: false,
           },
         });
-        console.log("🚀 ~ file: Todo.jsx:102 ~ updateTodo ~ data:", data)
         setTodoList(data?.data);
         setEditTodeId("");
       } else alert("An empty world is impossible!..");

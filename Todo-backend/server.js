@@ -50,34 +50,26 @@ app.patch("/api/todo", (req, res) => {
 
 app.delete("/api/todo", (req, res) => {
   const { id } = req.body;
-  console.log("🚀 ~ file: server.js:37 ~ app.delete ~ id:", id);
   const newlist = todoList.filter((item) => item.id != id);
-
   fs.writeFileSync("./TodoList.json", JSON.stringify(newlist));
   res.json(newlist);
 });
 
 app.post("/api/gettodobyid", (req, res) => {
   const { id } = req.body;
-  console.log("🚀 ~ file: server.js:45 ~ app.get ~ id:", id);
   const todo = todoList.filter((item) => item.id == id);
   res.json(todo);
 });
 
 app.put("/api/todo", (req, res) => {
   const { id, todo, isCompleted } = req.body;
-  console.log("🚀 ~ file: server.js:69 ~ app.put ~ req.body:", req.body);
-
   var missedItem = [];
   for (let key in { id, todo, isCompleted }) {
     if (!req.body.hasOwnProperty(key)) {
       missedItem.push(key);
     }
   }
-  console.log("🚀 ~ file: server.js:72 ~ app.put ~ missedItem:", missedItem)
-
   if (!missedItem.length === 0) {
-    console.log("🚀 ~ file: server.js:79 ~ app.put ~ missedItem:", missedItem);
     res
       .status(400)
       .json({ message: `missing the following item: ${missedItem}` });
