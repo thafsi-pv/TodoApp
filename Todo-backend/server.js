@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
 
 app.use(cors());
 app.use(express.json());
@@ -14,15 +15,30 @@ app.get("/api/todo", (req, res) => {
 });
 
 app.post("/api/todo", (req, res) => {
-  todoList.unshift(req.body.todo);
-  res.json(todoList);
+  const { todo } = req.body;
+  if (!("todo" in req.body)) {
+    res.status(400).json({
+      message: `${JSON.stringify(
+        req.body
+      )}:This attribute is not accepted, Required attributes: todo`,
+    });
+    return;
+  }
+  const newitem = {
+    id: uuidv4(),
+    todo: todo,
+    isCompleted: false,
+  };
+  const todolist = todoList;
+  todolist.unshift(newitem);
+  fs.writeFileSync("./TodoList.json", JSON.stringify(todolist));
+  res.json(todolist);
 });
 
 app.patch("/api/todo", (req, res) => {
   const { id } = req.body;
   const newlist = todoList.map((item) => {
     if (item.id == id) {
-      console.log(item.id, "iddd");
       return { ...item, isCompleted: !item.isCompleted };
     } else {
       return { ...item };
@@ -49,17 +65,34 @@ app.post("/api/gettodobyid", (req, res) => {
 });
 
 app.put("/api/todo", (req, res) => {
-  const { id, todo } = req.body;
-  const index = todoList.findIndex((item) => item.id == id);
-  const newlist = todoList.map((item) => {
-    if (item.id == id) {
-      return { ...item, todo: todo, isCompleted: false };
-    } else {
-      return { ...item };
+  const { id, todo, isCompleted } = req.body;
+  console.log("🚀 ~ file: server.js:69 ~ app.put ~ req.body:", req.body);
+
+  var missedItem = [];
+  for (let key in { id, todo, isCompleted }) {
+    if (!req.body.hasOwnProperty(key)) {
+      missedItem.push(key);
     }
-  });
-  fs.writeFileSync("./TodoList.json", JSON.stringify(newlist));
-  res.json(newlist);
+  }
+  console.log("🚀 ~ file: server.js:72 ~ app.put ~ missedItem:", missedItem)
+
+  if (!missedItem.length === 0) {
+    console.log("🚀 ~ file: server.js:79 ~ app.put ~ missedItem:", missedItem);
+    res
+      .status(400)
+      .json({ message: `missing the following item: ${missedItem}` });
+    return;
+  } else {
+    const newlist = todoList.map((item) => {
+      if (item.id == id) {
+        return { ...item, todo: todo, isCompleted: isCompleted || false };
+      } else {
+        return { ...item };
+      }
+    });
+    fs.writeFileSync("./TodoList.json", JSON.stringify(newlist));
+    res.json(newlist);
+  }
 });
 
 app.delete("/api/deleteiscompleted", (req, res) => {

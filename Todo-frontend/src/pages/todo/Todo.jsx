@@ -4,7 +4,12 @@ import { BsFillPencilFill, BsFillTrash3Fill, BsCircle } from "react-icons/bs";
 import { AiOutlineCheckCircle } from "react-icons/ai";
 import { IoIosClose } from "react-icons/io";
 import axios from "axios";
-import { TODO_API, TODO_DELETECOMPLETED_API, TODO_FILTERLIST_API, TODO_GETBYID_API } from "../../constants/constants";
+import {
+  TODO_API,
+  TODO_DELETECOMPLETED_API,
+  TODO_FILTERLIST_API,
+  TODO_GETBYID_API,
+} from "../../constants/constants";
 
 export const Todo = () => {
   const [todoList, setTodoList] = useState([]);
@@ -32,30 +37,25 @@ export const Todo = () => {
     setItemLeft(count);
   }, [todoList]);
 
-  const handleAddTodo = () => {
-    if (newTodo) {
-      const newitem = {
-        id: Math.random().toString(36).substr(2, 9),
-        todo: newTodo,
-        isCompleted: false,
-      };
-      addnewTodo(newitem);
-      setNewTodo("");
-      todoListRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      alert("An empty world is impossible!");
+  const handleAddTodo = async () => {
+    try {
+      if (newTodo) {
+        const data = await axios(TODO_API, {
+          method: "POST",
+          data: {
+            todo: newTodo,
+          },
+        });
+        setTodoList(data?.data);
+        setNewTodo("");
+        todoListRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        alert("An empty world is impossible!");
+      }
+      inputRef.current.focus();
+    } catch (error) {
+      console.log(error.response.data.message);
     }
-    inputRef.current.focus();
-  };
-
-  const addnewTodo = async (newitem) => {
-    const data = await axios(TODO_API, {
-      method: "POST",
-      data: {
-        todo: newitem,
-      },
-    });
-    setTodoList(data?.data);
   };
 
   const todoIsCompleted = async (id) => {
@@ -89,17 +89,23 @@ export const Todo = () => {
   };
 
   const updateTodo = async () => {
-    if (editTodo) {
-      const data = await axios(TODO_API, {
-        method: "PUT",
-        data: {
-          id: editTodoId,
-          todo: editTodo,
-        },
-      });
-      setTodoList(data?.data);
-      setEditTodeId("");
-    } else alert("An empty world is impossible!..");
+    try {
+      if (editTodo) {
+        const data = await axios(TODO_API, {
+          method: "PUT",
+          data: {
+            id: editTodoId,
+            todo: editTodo,
+            isCompleted: false,
+          },
+        });
+        console.log("🚀 ~ file: Todo.jsx:102 ~ updateTodo ~ data:", data)
+        setTodoList(data?.data);
+        setEditTodeId("");
+      } else alert("An empty world is impossible!..");
+    } catch (error) {
+      console.log(error?.response?.data?.message);
+    }
   };
 
   const clearCompleted = async () => {
@@ -108,7 +114,7 @@ export const Todo = () => {
     });
 
     setTodoList(data?.data);
-    setFilterType('all')
+    setFilterType("all");
   };
 
   const handleFilterlist = async (type) => {
@@ -230,11 +236,21 @@ export const Todo = () => {
               <p>{itemLeft} Item left</p>
             </div>
             <div className="btn-filter">
-              <p className={`${filterType==='all'?'active':''}`} onClick={() => handleFilterlist("all")}>
+              <p
+                className={`${filterType === "all" ? "active" : ""}`}
+                onClick={() => handleFilterlist("all")}>
                 All
               </p>
-              <p className={`${filterType==='active'?'active':''}`} onClick={() => handleFilterlist("active")}>Active</p>
-              <p className={`${filterType==='completed'?'active':''}`} onClick={() => handleFilterlist("completed")}>Completed</p>
+              <p
+                className={`${filterType === "active" ? "active" : ""}`}
+                onClick={() => handleFilterlist("active")}>
+                Active
+              </p>
+              <p
+                className={`${filterType === "completed" ? "active" : ""}`}
+                onClick={() => handleFilterlist("completed")}>
+                Completed
+              </p>
             </div>
             <div className="">
               <p className="clear-completed" onClick={() => clearCompleted()}>
